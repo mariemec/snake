@@ -1,7 +1,10 @@
 #include <QGraphicsRectItem>
+#include <QGraphicsTextItem>
 #include <QObject>
-#include "fruit.h"
+#include <QTimer>
+#include <QLabel>
 #include <vector>
+#include "fruit.h"
 
 using namespace std;
 
@@ -9,27 +12,36 @@ class Snake : public QObject, public QGraphicsRectItem {
 	Q_OBJECT
 public:
 	Snake();
+	void init();
 	void keyPressEvent(QKeyEvent *event);
 	void growSnake();
 	void generateFruit();
 	void updateCoord();
 
+
 private slots:
 	void move();
 	void checkCollision();
+	void update();
 
 private:
+	QTimer *timer = new QTimer();
 	Fruit *fruit = new Fruit();
 	Fruit *newFruit;
+
 	int headX;
 	int headY;
-	vector <Fruit*> snake;
+	vector <Fruit*> body;
 
-	int sizeOfSnake = 0;
+	int sizeOfSnake;
 
 	int gameOver; //0 : not started, 1:started, 3:Over
-	bool up = false;
-	bool down = false;
-	bool right = false;
-	bool left = false;
+	bool up;
+	bool down;
+	bool right;
+	bool left;
+	bool clicked;
+
+	bool startMsgVisible = false;
+	QGraphicsTextItem *start;
 };

@@ -1,49 +1,64 @@
 #include "snake.h"
 #include <QKeyEvent>
 #include <QGraphicsScene>
-#include <QTimer>
+#include <QLabel>
+#include <QString>
+#include <QFont>
 
 #include <QDebug>
 
 Snake::Snake() {
-	setPos(WIDTH/2, HEIGHT/2);
-	headX = x(); 
-	headY = y();
-	gameOver = 0; //GAME NOT STARTED
-	
-	QTimer *timer = new QTimer();
+
+	init();
 	connect(timer, SIGNAL(timeout()), this, SLOT(checkCollision()));
 	connect(timer, SIGNAL(timeout()), this, SLOT(move()));
-	timer->start(250);
+	connect(timer, SIGNAL(timeout()), this, SLOT(update()));
+	timer->start(100);
+}
+
+void Snake::init() {
+	setPos(WIDTH / 2, HEIGHT / 2);
+	headX = x();
+	headY = y();
+	sizeOfSnake = 0;
+
+	gameOver = 0; //GAME NOT STARTED
+	clicked = false;
+	up = false;
+	down = false;
+	right = false;
+	left = false;
+
+	QString startmsg("Press 'ENTER' to start game. Use arrow keys to move.");
+	start = new QGraphicsTextItem(startmsg, this);
+	start->adjustSize();
+	start->setPos(-WIDTH/2, -HEIGHT/2);
+	setBrush(Qt::darkGreen);
 }
 
 void Snake::keyPressEvent(QKeyEvent *event)
 {
-	if (event->key() == Qt::Key_S) {								//S to start
+	if (event->key() == Qt::Key_Return) {						//Enter to start
+		setFocus();
 		scene()->addItem(fruit);
 		qDebug() << fruit->getX() << ", " << fruit->getY();
 		gameOver = 1; //GAME STARTED
 	}
-	if (gameOver == 1) {
+	if (gameOver == 1 && clicked == false) {
 		if (event->key() == Qt::Key_Left && right == false) {
-			up = false; down = false; left = true; right = false;
+			up = false; down = false; left = true; right = false; clicked = true;
 		}
 		else if (event->key() == Qt::Key_Right && left == false) {
-			up = false; down = false; left = false; right = true;
+			up = false; down = false; left = false; right = true; clicked = true;
 		}
 
 		else if (event->key() == Qt::Key_Up && down == false) {
-			up = true; down = false; left = false; right = false;
+			up = true; down = false; left = false; right = false; clicked = true;
 		}
 
 		else if (event->key() == Qt::Key_Down && up == false) {
-			up = false; down = true; left = false; right = false;
+			up = false; down = true; left = false; right = false; clicked = true;
 		}
-	}
-
-	else if (event->key() == Qt::Key_Escape) {						//PAUSE
-		gameOver = 2;
-		qDebug() << headX << " " << headY;
 	}
 }
 
@@ -56,14 +71,14 @@ void Snake::growSnake()
 
 void Snake::generateFruit() {
 	newFruit = new Fruit;
-	for (int i = 0; i < snake.size(); i++) {
-		if (newFruit->pos() == snake[i]->pos()) {
+	for (int i = 0; i < body.size(); i++) {
+		if (newFruit->pos() == body[i]->pos()) {
 			newFruit->randomizeFruit();
 			newFruit->setPos(newFruit->getX(), newFruit->getY());
 		}
 	}
 	scene()->addItem(newFruit);
-	snake.push_back(fruit);
+	body.push_back(fruit);
 	fruit = newFruit;
 }
 
@@ -92,19 +107,20 @@ void Snake::checkCollision()
 	}
 
 	if (x() == fruit->getX() && y() == fruit->getY()) {			//FRUIT
+		fruit->changeColor();
 		growSnake();
 	}
 
-	if (snake.empty() == false) {
-		for (int i = 0; i < snake.size() - 1; i++) {		//COLLISION WITH ITSELF
-
-			if (x() == snake[i]->x() && y() == snake[i]->y()) {
+	if (body.empty() == false) {
+		qDebug() << "Head: " << x() << ", " << y();
+		qDebug() << body.size();
+		for (int i = 0; i < body.size()-1; i++) {		//COLLISION WITH ITSELF
+			if (x() == body[i]->x() && y() == body[i]->y()) {
 				gameOver = 3;
 			}
-			qDebug() << snake[i]->x() << ", " << snake[i]->y();
+			qDebug() << body[i]->x() << ", " << body[i]->y();
 		}
-		qDebug() << "Head: " << x() << ", " << y();
-		qDebug() << snake.size();
+
 	}
 
 }
@@ -123,6 +139,7 @@ void Snake::move() {
 		else if (right) {
 			setPos(x() + DOTSIZE, y()); updateCoord();
 		}
+		clicked = false;
 	}
 
 	else if (gameOver==3) {		//Game Over
@@ -133,11 +150,28 @@ void Snake::move() {
 void Snake::updateCoord() {
 	for (int i = sizeOfSnake-1; i >=0; i--) {
 		if (i != 0)
-			snake[i]->setPos(snake[i - 1]->pos());
+			body[i]->setPos(body[i - 1]->pos());
 		else
-			snake[i]->setPos(headX, headY);
+			body[i]->setPos(headX, headY);
 	}
 	headX = x();
 	headY = y();
+}
 
+void Snake::update() {
+	if (gameOver == 0 && startMsgVisible == false) {
+		startMsgVisible = true;
+	}
+	if (gameOver == 1) {
+		if (startMsgVisible == true) {
+			scene()->removeItem(start);
+			startMsgVisible = false;
+		}
+		//UPDATE SCORE
+	}
+
+	if (gameOver == 3) {
+		//SHOW GAME OVER
+		timer->stop();
+	}
 }
