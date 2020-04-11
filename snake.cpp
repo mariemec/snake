@@ -4,6 +4,7 @@
 #include <QLabel>
 #include <QString>
 #include <QFont>
+#include <fstream>
 
 #include <QDebug>
 
@@ -179,4 +180,85 @@ void Snake::update() {
 		score->setZValue(1);
 		score->setPos(WIDTH / 4, HEIGHT / 4);
 	}
+}
+
+void Snake::saveScore()
+{
+	sortScore();
+	bool isDejaRemplace = false;//pour pas remplacer plein de fois la valeur la plus basse si il y en a plusieur ex: dans la .txt les trois pires highscore son 2
+	fstream file;
+	file.open("highscore.txt", ios::out);
+
+	for (int j = 0; j < 10; ++j) {
+
+		if (Scores[j] == valueMin && !isDejaRemplace)//si la valeur de score est la plus petite il va la remplacer avec la nouveau highscore
+		{
+			isDejaRemplace = true;
+			if (sizeOfSnake > valueMin)//si le nouveau highscore est plus petit, il laisse la valeur minimal precedente
+				Scores[j] = sizeOfSnake;
+		}
+
+		if (j == 9)//ajoute un point virgule à la fin du fichier .txt
+			file << Scores[j] << ";";
+		else//met des virgule en chaque score dans le .txt
+			file << Scores[j] << ",";
+	}
+	file.close();
+}
+
+void Snake::sortScore()
+{
+	fstream file;
+	string temp;
+
+	file.open("highscore.txt", ios::in);//ouvre le fichier .txt pour avoir les higscore precedent
+
+	getline(file, temp, ';');//prend tout le fichier .txt jusqu'a la fin (un point virgule)
+
+
+	int cpt = 0;//valeur incrementer à chaque inserton dans le tableau de score
+	for (int i = 0; i < temp.length(); ++i) {
+		if (temp.at(i) != ',')// si n'est pas une virgule -> est un chiffre
+		{
+			Scores[cpt] = stoi(temp.substr(i), nullptr, 10);//prend le chiffre
+			cpt++;
+			if (i < temp.length() - 1)//si le chiffre à deux décimal, il incremente i de un pour pas qu'il reprenne le meme chiffre apres
+			{
+				if (temp.at(i + 1) != ',')
+				{
+					i++;
+				}
+			}
+			if (i < temp.length() - 2)//si le chiffre à trois décimal, il incremente i de deux pour pas qu'il reprenne le meme chiffre apres
+			{
+				if (temp.at(i + 1) != ',')
+				{
+					i++;
+				}
+			}
+
+		}
+	}
+	int max = -1;//initialise max à -1 pour pas que quand le tableau soit remplit de 0 il y ai une erreur d'index_out_of_bound
+	int indmax;//indince à laquelle la valeur mac à ete trouver
+	int ScoreTemp[10];//tableaupour stocker temporairement le score
+	for (int k = 0; k < 10; ++k)//boucle pour trier les score en ordre de grosseur
+	{
+		for (int j = 0; j < 10; ++j) {
+			if (Scores[j] > max)//si le score est plus gros que max max devient le score
+			{
+				max = Scores[j];
+				indmax = j;
+			}
+		}
+		ScoreTemp[k] = Scores[indmax];//met le socre en ordre dans le tableau temporaire
+		Scores[indmax] = 0;
+		max = 0;
+	}
+	for (int l = 0; l < 10; ++l) //remettre le tableau temporaire dans le vrai tableau
+	{
+
+		Scores[l] = ScoreTemp[l];
+	}
+	valueMin = Scores[9];//savoir quelle valeur est la plus petite pour pouvoir la rmeplacer plus tard si on fait un meilleure score
 }

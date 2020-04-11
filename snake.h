@@ -20,7 +20,8 @@ public:
 	void growSnake();
 	void generateFruit();
 	void updateCoord();
-
+	void saveScore();
+	void sortScore();
 
 private slots:
 	void move();
@@ -37,6 +38,8 @@ private:
 	vector <Fruit*> body;
 
 	int sizeOfSnake;
+	int valueMin;
+	int Scores[10];
 
 	int gameOver; //0 : not started, 1:started, 3:Over
 	bool up;
