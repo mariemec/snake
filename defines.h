@@ -1,4 +1,5 @@
 #pragma once
-#define WIDTH 500
-#define HEIGHT 500
-#define DOTSIZE (HEIGHT/(2*5))
+#define MINSIZE 1
+#define WIDTH (MINSIZE*700)
+#define HEIGHT WIDTH
+#define DOTSIZE (HEIGHT/(MINSIZE*10))
