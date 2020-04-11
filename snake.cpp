@@ -33,15 +33,16 @@ void Snake::init() {
 	start = new QGraphicsTextItem(startmsg, this);
 	start->adjustSize();
 	start->setPos(-WIDTH/2, -HEIGHT/2);
+
+	score->setPos(0, 0);
+	
 	setBrush(Qt::darkGreen);
 }
 
 void Snake::keyPressEvent(QKeyEvent *event)
 {
 	if (event->key() == Qt::Key_Return) {						//Enter to start
-		setFocus();
 		scene()->addItem(fruit);
-		qDebug() << fruit->getX() << ", " << fruit->getY();
 		gameOver = 1; //GAME STARTED
 	}
 	if (gameOver == 1 && clicked == false) {
@@ -64,8 +65,8 @@ void Snake::keyPressEvent(QKeyEvent *event)
 
 void Snake::growSnake()
 {
-	qDebug() << "SNAKE SHOULD GROW!";
-	sizeOfSnake++;
+	sizeOfSnake = sizeOfSnake+1;
+	score->increase();
 	generateFruit();
 }
 
@@ -84,8 +85,6 @@ void Snake::generateFruit() {
 
 void Snake::checkCollision()
 {
-	//qDebug() << x() << ", " << y();
-
 	if (y() < 0) {						//TOP WALL
 		qDebug() << "top wall hit";
 		gameOver = 3;
@@ -112,17 +111,12 @@ void Snake::checkCollision()
 	}
 
 	if (body.empty() == false) {
-		qDebug() << "Head: " << x() << ", " << y();
-		qDebug() << body.size();
 		for (int i = 0; i < body.size()-1; i++) {		//COLLISION WITH ITSELF
 			if (x() == body[i]->x() && y() == body[i]->y()) {
 				gameOver = 3;
 			}
-			qDebug() << body[i]->x() << ", " << body[i]->y();
 		}
-
 	}
-
 }
 
 void Snake::move() {
@@ -142,9 +136,6 @@ void Snake::move() {
 		clicked = false;
 	}
 
-	else if (gameOver==3) {		//Game Over
-		qDebug() << "Game over";
-	}
 }
 
 void Snake::updateCoord() {
@@ -168,10 +159,24 @@ void Snake::update() {
 			startMsgVisible = false;
 		}
 		//UPDATE SCORE
+		if (scoreVisible == false){
+			score->setPos(0, HEIGHT);
+			scene()->addItem(score);
+			scoreVisible = true;
+		}
 	}
 
 	if (gameOver == 3) {
 		//SHOW GAME OVER
 		timer->stop();
+		setBrush(Qt::NoBrush);
+		setPen(Qt::NoPen);
+		for (int i = 0; i < sizeOfSnake; i++) {
+			body[i]->setBrush(Qt::NoBrush);
+			body[i]->setPen(Qt::NoPen);
+		}
+		score->gameOver();
+		score->setZValue(1);
+		score->setPos(WIDTH / 4, HEIGHT / 4);
 	}
 }

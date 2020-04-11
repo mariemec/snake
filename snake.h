@@ -3,8 +3,11 @@
 #include <QObject>
 #include <QTimer>
 #include <QLabel>
+#include <QLCDNumber>
 #include <vector>
+#include "score.h"
 #include "fruit.h"
+
 
 using namespace std;
 
@@ -43,5 +46,7 @@ private:
 	bool clicked;
 
 	bool startMsgVisible = false;
+	bool scoreVisible = false;
 	QGraphicsTextItem *start;
+	Score *score = new Score();
 };

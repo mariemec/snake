@@ -140,12 +140,14 @@
     <ClCompile Include="message.cpp" />
     <ClCompile Include="fruit.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="score.cpp" />
     <ClCompile Include="snake.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="message.h" />
     <ClInclude Include="defines.h" />
     <ClInclude Include="fruit.h" />
+    <ClInclude Include="score.h" />
     <CustomBuild Include="snake.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">snake.h;debug\moc_predefs.h;C:\Qt\5.14.2\msvc2017_64\bin\moc.exe;%(AdditionalInputs)</AdditionalInputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Qt\5.14.2\msvc2017_64\bin\moc.exe  -DUNICODE -D_UNICODE -DWIN32 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -DWIN64 -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB --compiler-flavor=msvc --include C:/Users/15146/Documents/School/S2/APP7/snakescene/debug/moc_predefs.h -IC:/Qt/5.14.2/msvc2017_64/mkspecs/win32-msvc -IC:/Users/15146/Documents/School/S2/APP7/snakescene -IC:/Users/15146/Documents/School/S2/APP7/snakescene -IC:/Qt/5.14.2/msvc2017_64/include -IC:/Qt/5.14.2/msvc2017_64/include/QtWidgets -IC:/Qt/5.14.2/msvc2017_64/include/QtGui -IC:/Qt/5.14.2/msvc2017_64/include/QtANGLE -IC:/Qt/5.14.2/msvc2017_64/include/QtCore -I"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\ATLMFC\include" -I"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\include" -I"C:\Program Files (x86)\Windows Kits\10\include\10.0.17763.0\ucrt" -I"C:\Program Files (x86)\Windows Kits\10\include\10.0.17763.0\shared" -I"C:\Program Files (x86)\Windows Kits\10\include\10.0.17763.0\um" -I"C:\Program Files (x86)\Windows Kits\10\include\10.0.17763.0\winrt" -I"C:\Program Files (x86)\Windows Kits\10\include\10.0.17763.0\cppwinrt" snake.h -o debug\moc_snake.cpp</Command>
