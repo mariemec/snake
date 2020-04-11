@@ -19,10 +19,7 @@ class Menu: public QObject
 	QPushButton *highScoresbtn;
 	QPushButton *Quit;
 	QGraphicsPixmapItem *howTo;
-	QGraphicsPixmapItem *title;
 	QGraphicsView *viewMenu;
-	int buttonSizeW;
-	int buttonSizeH;
 	Game* game;
 	
 

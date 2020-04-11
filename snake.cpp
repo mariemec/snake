@@ -1,169 +1,126 @@
 #include "snake.h"
 #include <QKeyEvent>
 #include <QGraphicsScene>
-#include <QTimer>
+#include <QLabel>
+#include <QString>
+#include <QFont>
 #include <fstream>
+
 #include <QDebug>
 
 Snake::Snake() {
-	setPos(WIDTH/2, HEIGHT/2);
-	headX = x(); 
-	headY = y();
-	gameOver = 0; //GAME NOT STARTED
-	clicked = false;
-	valueMin = 0;
-	
-	QTimer *timer = new QTimer();
+
+	init();
 	connect(timer, SIGNAL(timeout()), this, SLOT(checkCollision()));
 	connect(timer, SIGNAL(timeout()), this, SLOT(move()));
-	timer->start(250);
+	connect(timer, SIGNAL(timeout()), this, SLOT(update()));
+	timer->start(100);
+}
+
+void Snake::init() {
+	setPos(WIDTH / 2, HEIGHT / 2);
+	headX = x();
+	headY = y();
+	sizeOfSnake = 0;
+
+	gameOver = 0; //GAME NOT STARTED
+	clicked = false;
+	up = false;
+	down = false;
+	right = false;
+	left = false;
+
+	QString startmsg("To begin, Click on the Snake and Press 'ENTER'. Use arrow keys to move.");
+	start = new QGraphicsTextItem(startmsg, this);
+	start->adjustSize();
+	start->setPos(-WIDTH/2, -HEIGHT/2);
+
+	score->setPos(0, 0);
+	
+	setBrush(Qt::darkGreen);
 }
 
 void Snake::keyPressEvent(QKeyEvent *event)
 {
-	if (event->key() == Qt::Key_Return) {								//S to start
-		setFocus();
+	if (event->key() == Qt::Key_Return) {						//Enter to start
 		scene()->addItem(fruit);
-		qDebug() << fruit->getX() << ", " << fruit->getY();
 		gameOver = 1; //GAME STARTED
 	}
 	if (gameOver == 1 && clicked == false) {
 		if (event->key() == Qt::Key_Left && right == false) {
-			up = false; down = false; left = true; right = false;
-			clicked = true;
+			up = false; down = false; left = true; right = false; clicked = true;
 		}
 		else if (event->key() == Qt::Key_Right && left == false) {
-			up = false; down = false; left = false; right = true;
-			clicked = true;
+			up = false; down = false; left = false; right = true; clicked = true;
 		}
 
 		else if (event->key() == Qt::Key_Up && down == false) {
-			up = true; down = false; left = false; right = false;
-			clicked = true;
+			up = true; down = false; left = false; right = false; clicked = true;
 		}
 
 		else if (event->key() == Qt::Key_Down && up == false) {
-			up = false; down = true; left = false; right = false;
-			clicked = true;
+			up = false; down = true; left = false; right = false; clicked = true;
 		}
-		if (event->key() == Qt::Key_A && right == false) {
-			up = false; down = false; left = true; right = false;
-			clicked = true;
-		}
-		else if (event->key() == Qt::Key_D && left == false) {
-			up = false; down = false; left = false; right = true;
-			clicked = true;
-		}
-
-		else if (event->key() == Qt::Key_W && down == false) {
-			up = true; down = false; left = false; right = false;
-			clicked = true;
-		}
-
-		else if (event->key() == Qt::Key_S && up == false) {
-			up = false; down = true; left = false; right = false;
-			clicked = true;
-		}
-	}
-
-	else if (event->key() == Qt::Key_Escape) {						//PAUSE
-		gameOver = 2;
-		qDebug() << headX << " " << headY;
 	}
 }
 
 void Snake::growSnake()
 {
-	qDebug() << "SNAKE SHOULD GROW!";
-	sizeOfSnake++;
+	sizeOfSnake = sizeOfSnake+1;
+	score->increase();
 	generateFruit();
 }
 
 void Snake::generateFruit() {
 	newFruit = new Fruit;
-	for (int i = 0; i < snake.size(); i++) {
-		if (newFruit->pos() == snake[i]->pos()) {
+	for (int i = 0; i < body.size(); i++) {
+		if (newFruit->pos() == body[i]->pos()) {
 			newFruit->randomizeFruit();
 			newFruit->setPos(newFruit->getX(), newFruit->getY());
 		}
 	}
 	scene()->addItem(newFruit);
-	snake.push_back(fruit);
+	body.push_back(fruit);
 	fruit = newFruit;
+	fruit->setZValue(-1);
 }
 
 void Snake::checkCollision()
 {
-	//qDebug() << x() << ", " << y();
-
 	if (y() < 0) {						//TOP WALL
 		qDebug() << "top wall hit";
 		gameOver = 3;
-		saveScore();
 	}
 
 	if (y() > (HEIGHT - DOTSIZE) ){		//BOTTOM WALL
 		qDebug() << "bottom wall hit";
 		gameOver = 3;
-		saveScore();
 	}
 
 	if (x() < 0) {						//LEFT WALL
 		qDebug() << "left wall hit";
 		gameOver = 3;
-		saveScore();
 	}
 
 	if (x() > WIDTH - DOTSIZE) {		//RIGHT WALL
 		qDebug() << "right wall hit";
 		gameOver = 3;
-		saveScore();
 	}
 
 	if (x() == fruit->getX() && y() == fruit->getY()) {			//FRUIT
+		fruit->changeColor();
 		growSnake();
 	}
 
-	if (snake.empty() == false) {
-		for (int i = 0; i < snake.size() - 1; i++) {		//COLLISION WITH ITSELF
-
-			if (x() == snake[i]->x() && y() == snake[i]->y()) {
+	if (body.empty() == false) {
+		for (int i = 0; i < body.size()-1; i++) {		//COLLISION WITH ITSELF
+			if (x() == body[i]->x() && y() == body[i]->y()) {
 				gameOver = 3;
-				saveScore();
 			}
-			qDebug() << snake[i]->x() << ", " << snake[i]->y();
 		}
-		qDebug() << "Head: " << x() << ", " << y();
-		qDebug() << snake.size();
 	}
-
+	
 }
-
-void Snake::saveScore()
-{
-	sortScore();
-	bool isDejaRemplace = false;//pour pas remplacer plein de fois la valeur la plus basse si il y en a plusieur ex: dans la .txt les trois pires highscore son 2
-	fstream file;
-	file.open("highscore.txt", ios::out);
-
-	for (int j = 0; j < 10; ++j) {
-
-		if (Score[j] == valueMin && !isDejaRemplace)//si la valeur de score est la plus petite il va la remplacer avec la nouveau highscore
-		{
-			isDejaRemplace = true;
-			if (sizeOfSnake > valueMin)//si le nouveau highscore est plus petit, il laisse la valeur minimal precedente
-				Score[j] = sizeOfSnake;
-		}
-
-		if (j == 9)//ajoute un point virgule à la fin du fichier .txt
-			file << Score[j] << ";";
-		else//met des virgule en chaque score dans le .txt
-			file << Score[j] << ",";
-	}
-
-	file.close();
-}
-
 
 void Snake::move() {
 	if (gameOver == 1) {
@@ -182,21 +139,74 @@ void Snake::move() {
 		clicked = false;
 	}
 
-	else if (gameOver==3) {		//Game Over
-		qDebug() << "Game over";
-	}
 }
 
 void Snake::updateCoord() {
 	for (int i = sizeOfSnake-1; i >=0; i--) {
 		if (i != 0)
-			snake[i]->setPos(snake[i - 1]->pos());
+			body[i]->setPos(body[i - 1]->pos());
 		else
-			snake[i]->setPos(headX, headY);
+			body[i]->setPos(headX, headY);
 	}
 	headX = x();
 	headY = y();
+}
 
+void Snake::update() {
+	if (gameOver == 0 && startMsgVisible == false) {
+		startMsgVisible = true;
+	}
+	if (gameOver == 1) {
+		if (startMsgVisible == true) {
+			scene()->removeItem(start);
+			startMsgVisible = false;
+		}
+		//UPDATE SCORE
+		if (scoreVisible == false){
+			score->setPos(0, HEIGHT);
+			scene()->addItem(score);
+			scoreVisible = true;
+		}
+	}
+
+	if (gameOver == 3) {
+		//SHOW GAME OVER
+		timer->stop();
+		saveScore();
+		setBrush(Qt::NoBrush);
+		setPen(Qt::NoPen);
+		for (int i = 0; i < sizeOfSnake; i++) {
+			body[i]->setBrush(Qt::NoBrush);
+			body[i]->setPen(Qt::NoPen);
+		}
+		score->gameOver();
+		score->setZValue(1);
+		score->setPos(WIDTH / 2-150, HEIGHT / 2-100);
+	}
+}
+
+void Snake::saveScore()
+{
+	sortScore();
+	bool isDejaRemplace = false;//pour pas remplacer plein de fois la valeur la plus basse si il y en a plusieur ex: dans la .txt les trois pires highscore son 2
+	fstream file;
+	file.open("highscore.txt", ios::out);
+
+	for (int j = 0; j < 10; ++j) {
+
+		if (Scores[j] == valueMin && !isDejaRemplace)//si la valeur de score est la plus petite il va la remplacer avec la nouveau highscore
+		{
+			isDejaRemplace = true;
+			if (sizeOfSnake > valueMin)//si le nouveau highscore est plus petit, il laisse la valeur minimal precedente
+				Scores[j] = sizeOfSnake;
+		}
+
+		if (j == 9)//ajoute un point virgule à la fin du fichier .txt
+			file << Scores[j] << ";";
+		else//met des virgule en chaque score dans le .txt
+			file << Scores[j] << ",";
+	}
+	file.close();
 }
 
 void Snake::sortScore()
@@ -205,15 +215,15 @@ void Snake::sortScore()
 	string temp;
 
 	file.open("highscore.txt", ios::in);//ouvre le fichier .txt pour avoir les higscore precedent
-	
+
 	getline(file, temp, ';');//prend tout le fichier .txt jusqu'a la fin (un point virgule)
-	
+
 
 	int cpt = 0;//valeur incrementer à chaque inserton dans le tableau de score
 	for (int i = 0; i < temp.length(); ++i) {
 		if (temp.at(i) != ',')// si n'est pas une virgule -> est un chiffre
 		{
-			Score[cpt] = stoi(temp.substr(i), nullptr, 10);//prend le chiffre
+			Scores[cpt] = stoi(temp.substr(i), nullptr, 10);//prend le chiffre
 			cpt++;
 			if (i < temp.length() - 1)//si le chiffre à deux décimal, il incremente i de un pour pas qu'il reprenne le meme chiffre apres
 			{
@@ -238,20 +248,20 @@ void Snake::sortScore()
 	for (int k = 0; k < 10; ++k)//boucle pour trier les score en ordre de grosseur
 	{
 		for (int j = 0; j < 10; ++j) {
-			if (Score[j] > max)//si le score est plus gros que max max devient le score
+			if (Scores[j] > max)//si le score est plus gros que max max devient le score
 			{
-				max = Score[j];
+				max = Scores[j];
 				indmax = j;
 			}
 		}
-		ScoreTemp[k] = Score[indmax];//met le socre en ordre dans le tableau temporaire
-		Score[indmax] = 0;
+		ScoreTemp[k] = Scores[indmax];//met le socre en ordre dans le tableau temporaire
+		Scores[indmax] = 0;
 		max = 0;
 	}
 	for (int l = 0; l < 10; ++l) //remettre le tableau temporaire dans le vrai tableau
 	{
 
-		Score[l] = ScoreTemp[l];
+		Scores[l] = ScoreTemp[l];
 	}
-	valueMin = Score[9];//savoir quelle valeur est la plus petite pour pouvoir la rmeplacer plus tard si on fait un meilleure score
+	valueMin = Scores[9];//savoir quelle valeur est la plus petite pour pouvoir la rmeplacer plus tard si on fait un meilleure score
 }

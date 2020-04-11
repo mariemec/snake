@@ -2,14 +2,17 @@
 #include <QGraphicsView>
 #include <QGraphicsTextItem>
 #include <QString>
-#include <string>
+#include <QPushButton>
+#include <QObject>
 #include "defines.h"
 
-class HighScores
+class HighScores: public QObject
 {
+	Q_OBJECT
 	int* Score;
 	QGraphicsScene *scene;
 	QGraphicsView *view;
+	QPushButton *goToMenu;
 	
 	
 public:
