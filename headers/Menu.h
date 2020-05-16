@@ -21,13 +21,13 @@ class Menu: public QObject
 	QGraphicsPixmapItem *howTo;
 	QGraphicsView *viewMenu;
 	Game* game;
-	
 
 public:
 	Menu();
 	void setItems();
 	void addToScene();
 	void show();
+
 	QGraphicsScene* getScene() { return sceneMenu; }
 
 public slots:
