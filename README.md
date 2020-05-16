@@ -22,6 +22,25 @@ This should create a Visual Studio project that's already set up and ready to ru
 Open the project and run it. An application window should pop up.
 
 
+Connaissances déclaratives : QUOI
+
+— Objets des interfaces graphiques, Méthodes de programmation des interfaces graphiques, Ergonomie des interfaces graphiques
+
+Connaissances procédurales : COMMENT
+
+— Établir la procédure de développement d’une interface graphique ergonomique
+
+— Utiliser des classes d’objets graphiques Qt
+
+— Utiliser de l’utilitaire qmake
+
+— Gérer un projet en compilation séparée utilisant Qt sous Windows
+
+Connaissances conditionnelles : QUAND
+
+— Choisir les bons objets graphiques
+
+
 
 
 
