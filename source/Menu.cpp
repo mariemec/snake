@@ -1,4 +1,5 @@
 #include "Menu.h"
+#include <QDebug>
 
 
 Menu::Menu()
